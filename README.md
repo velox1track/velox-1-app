@@ -37,7 +37,7 @@ A beginner-friendly Expo React Native mobile app for organizing track competitio
 
 ## Tech Stack
 
-- **Framework**: Expo React Native (managed workflow)
+- **Framework**: Expo React Native SDK 53 (managed workflow)
 - **Language**: JavaScript (ES6+)
 - **Navigation**: React Navigation Stack Navigator
 - **Storage**: AsyncStorage for local persistence
@@ -46,10 +46,10 @@ A beginner-friendly Expo React Native mobile app for organizing track competitio
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
 - Expo CLI (`npm install -g @expo/cli`)
-- Expo Go app on your mobile device
+- Expo Go app on your mobile device (SDK 53 compatible)
 
 ## Installation & Setup
 
@@ -176,7 +176,7 @@ Default point allocation:
 
 ### Common Issues:
 - **App won't start**: Ensure all dependencies are installed
-- **Navigation errors**: Check that Expo Go is up to date
+- **Navigation errors**: Check that Expo Go is up to date (SDK 53)
 - **Data not saving**: Verify AsyncStorage permissions
 - **CSV import fails**: Check CSV format and required columns
 
