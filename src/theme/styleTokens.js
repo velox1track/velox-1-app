@@ -14,7 +14,11 @@ export const styleTokens = {
     white: '#FFFFFF',
     black: '#000000',
     danger: '#ff6464',
-    success: '#45A196'
+    success: '#45A196',
+    warning: '#f39c12',
+    disabled: '#bdc3c7',
+    surface: '#f8f9fa',
+    shadow: '#000000'
   },
 
   // Typography

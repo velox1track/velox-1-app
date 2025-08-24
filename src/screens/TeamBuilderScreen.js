@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
   ScrollView, 
-  TouchableOpacity, 
   Alert,
   SafeAreaView 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AthleteForm from '../components/AthleteForm';
 import CSVImporter from '../components/CSVImporter';
+import { MobileH1, MobileH2, MobileBody, MobileCaption } from '../components/Typography';
+import { Card } from '../components/Card';
+import { ButtonPrimary, ButtonSecondary } from '../components';
+import { styleTokens } from '../theme';
+import { scale } from '../utils/scale';
 
 const TeamBuilderScreen = () => {
   const [athletes, setAthletes] = useState([]);
@@ -102,14 +105,11 @@ const TeamBuilderScreen = () => {
 
         {/* CSV Import Toggle */}
         <View style={styles.csvToggleContainer}>
-          <TouchableOpacity 
-            style={styles.csvToggleButton} 
+          <ButtonSecondary 
             onPress={() => setShowCSVImporter(!showCSVImporter)}
           >
-            <Text style={styles.csvToggleText}>
-              {showCSVImporter ? 'Hide CSV Import' : 'Show CSV Import'}
-            </Text>
-          </TouchableOpacity>
+            {showCSVImporter ? 'Hide CSV Import' : 'Show CSV Import'}
+          </ButtonSecondary>
         </View>
 
         {/* CSV Importer */}
@@ -118,16 +118,15 @@ const TeamBuilderScreen = () => {
         )}
 
         {/* Athletes List */}
-        <View style={styles.athletesSection}>
+        <Card style={styles.athletesSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Athletes ({athletes.length})</Text>
+            <MobileH2>Athletes ({athletes.length})</MobileH2>
             {athletes.length > 0 && (
-              <TouchableOpacity 
-                style={styles.clearButton} 
+              <ButtonSecondary 
                 onPress={clearAllAthletes}
               >
-                <Text style={styles.clearButtonText}>Clear All</Text>
-              </TouchableOpacity>
+                Clear All
+              </ButtonSecondary>
             )}
           </View>
 
@@ -136,21 +135,21 @@ const TeamBuilderScreen = () => {
             <View style={styles.tierSummary}>
               <View style={styles.tierItem}>
                 <View style={[styles.tierBadge, styles.tierHigh]}>
-                  <Text style={styles.tierText}>High</Text>
+                  <MobileCaption>High</MobileCaption>
                 </View>
-                <Text style={styles.tierCount}>{getTierCount('High')}</Text>
+                <MobileBody>{getTierCount('High')}</MobileBody>
               </View>
               <View style={styles.tierItem}>
                 <View style={[styles.tierBadge, styles.tierMed]}>
-                  <Text style={styles.tierText}>Med</Text>
+                  <MobileCaption>Med</MobileCaption>
                 </View>
-                <Text style={styles.tierCount}>{getTierCount('Med')}</Text>
+                <MobileBody>{getTierCount('Med')}</MobileBody>
               </View>
               <View style={styles.tierItem}>
                 <View style={[styles.tierBadge, styles.tierLow]}>
-                  <Text style={styles.tierText}>Low</Text>
+                  <MobileCaption>Low</MobileCaption>
                 </View>
-                <Text style={styles.tierCount}>{getTierCount('Low')}</Text>
+                <MobileBody>{getTierCount('Low')}</MobileBody>
               </View>
             </View>
           )}
@@ -158,37 +157,36 @@ const TeamBuilderScreen = () => {
           {/* Athletes List */}
           {athletes.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No athletes added yet</Text>
-              <Text style={styles.emptySubtext}>
+              <MobileH1>No athletes added yet</MobileH1>
+              <MobileBody>
                 Use the form above or CSV import to add athletes
-              </Text>
+              </MobileBody>
             </View>
           ) : (
             <View style={styles.athletesList}>
               {athletes.map((athlete) => (
                 <View key={athlete.id} style={styles.athleteCard}>
                   <View style={styles.athleteInfo}>
-                    <Text style={styles.athleteName}>{athlete.name}</Text>
+                    <MobileH2>{athlete.name}</MobileH2>
                     <View style={[styles.tierBadge, styles[`tier${athlete.tier}`]]}>
-                      <Text style={styles.tierText}>{athlete.tier}</Text>
+                      <MobileCaption>{athlete.tier}</MobileCaption>
                     </View>
                   </View>
                   
                   {athlete.bestEvents && (
-                    <Text style={styles.bestEvents}>{athlete.bestEvents}</Text>
+                    <MobileCaption>{athlete.bestEvents}</MobileCaption>
                   )}
                   
-                  <TouchableOpacity 
-                    style={styles.deleteButton} 
+                  <ButtonSecondary 
                     onPress={() => deleteAthlete(athlete.id)}
                   >
-                    <Text style={styles.deleteButtonText}>Delete</Text>
-                  </TouchableOpacity>
+                    Delete
+                  </ButtonSecondary>
                 </View>
               ))}
             </View>
           )}
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -197,151 +195,135 @@ const TeamBuilderScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecf0f1',
+    backgroundColor: styleTokens.colors.background,
   },
   scrollView: {
     flex: 1,
   },
   csvToggleContainer: {
     alignItems: 'center',
-    marginVertical: 16,
-  },
-  csvToggleButton: {
-    backgroundColor: '#9b59b6',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  csvToggleText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+    marginVertical: scale(16),
   },
   athletesSection: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    margin: scale(16),
+    padding: scale(20),
+    borderRadius: scale(12),
+    shadowColor: styleTokens.colors.shadow,
+    shadowOffset: { width: 0, height: scale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
-    marginBottom: 20,
+    marginBottom: scale(20),
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    marginBottom: scale(16),
   },
   clearButton: {
-    backgroundColor: '#e74c3c',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
+    backgroundColor: styleTokens.colors.danger,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
+    borderRadius: scale(6),
   },
   clearButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
+    color: styleTokens.colors.white,
+    fontSize: scale(14),
     fontWeight: 'bold',
   },
   tierSummary: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
+    marginBottom: scale(20),
+    padding: scale(16),
+    backgroundColor: styleTokens.colors.surface,
+    borderRadius: scale(8),
   },
   tierItem: {
     alignItems: 'center',
   },
   tierBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    minWidth: 60,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(12),
+    minWidth: scale(60),
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   tierHigh: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: styleTokens.colors.danger,
   },
   tierMed: {
-    backgroundColor: '#f39c12',
+    backgroundColor: styleTokens.colors.warning,
   },
   tierLow: {
-    backgroundColor: '#27ae60',
+    backgroundColor: styleTokens.colors.success,
   },
   tierText: {
-    color: '#ffffff',
-    fontSize: 12,
+    color: styleTokens.colors.white,
+    fontSize: scale(12),
     fontWeight: 'bold',
   },
   tierCount: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: styleTokens.colors.textPrimary,
   },
   emptyContainer: {
     alignItems: 'center',
-    padding: 40,
+    padding: scale(40),
   },
   emptyText: {
-    fontSize: 18,
-    color: '#7f8c8d',
-    marginBottom: 8,
+    fontSize: scale(18),
+    color: styleTokens.colors.textSecondary,
+    marginBottom: scale(8),
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#bdc3c7',
+    fontSize: scale(14),
+    color: styleTokens.colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: scale(20),
+    opacity: 0.7,
   },
   athletesList: {
-    gap: 12,
+    gap: scale(12),
   },
   athleteCard: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#3498db',
+    backgroundColor: styleTokens.colors.surface,
+    padding: scale(16),
+    borderRadius: scale(8),
+    borderLeftWidth: scale(4),
+    borderLeftColor: styleTokens.colors.primary,
   },
   athleteInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   athleteName: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
-    color: '#2c3e50',
+    color: styleTokens.colors.textPrimary,
     flex: 1,
   },
   bestEvents: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: scale(14),
+    color: styleTokens.colors.textSecondary,
     fontStyle: 'italic',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
   deleteButton: {
-    backgroundColor: '#e74c3c',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
+    backgroundColor: styleTokens.colors.danger,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
+    borderRadius: scale(6),
     alignSelf: 'flex-end',
   },
   deleteButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
+    color: styleTokens.colors.white,
+    fontSize: scale(14),
     fontWeight: 'bold',
   },
 });

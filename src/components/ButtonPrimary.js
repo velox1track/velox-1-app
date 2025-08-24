@@ -26,6 +26,9 @@ export const ButtonPrimary = ({
   textStyle,
   ...props 
 }) => {
+  // Debug logging
+  console.log('ButtonPrimary props:', { title, onPress, disabled, style });
+  
   return (
     <Pressable
       style={({ pressed }) => [
@@ -46,7 +49,7 @@ export const ButtonPrimary = ({
         numberOfLines={1}
         ellipsizeMode="tail"
       >
-        {title}
+        {title || 'Button'} {/* Fallback text if title is missing */}
       </Text>
     </Pressable>
   );
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
     backgroundColor: styleTokens.colors.textMuted,
   },
   buttonText: {
-    color: styleTokens.colors.textPrimary,
+    color: styleTokens.colors.white, // Use white text for better contrast on seafoam background
     fontSize: scale(16), // Scaled font size
     fontWeight: styleTokens.components.button.primary.fontWeight,
     textTransform: 'uppercase',

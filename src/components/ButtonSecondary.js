@@ -27,6 +27,9 @@ export const ButtonSecondary = ({
   textStyle,
   ...props 
 }) => {
+  // Debug logging
+  console.log('ButtonSecondary props:', { title, onPress, disabled, style });
+  
   return (
     <Pressable
       style={({ pressed }) => [
@@ -47,7 +50,7 @@ export const ButtonSecondary = ({
         numberOfLines={1}
         ellipsizeMode="tail"
       >
-        {title}
+        {title || 'Button'} {/* Fallback text if title is missing */}
       </Text>
     </Pressable>
   );
@@ -56,13 +59,13 @@ export const ButtonSecondary = ({
 const styles = StyleSheet.create({
   button: {
     backgroundColor: styleTokens.colors.primaryDark,
-    paddingVertical: scale(7), // Scaled padding
-    paddingHorizontal: scale(28), // Scaled padding
-    borderRadius: scale(5), // Scaled border radius
+    paddingVertical: scale(12), // Increased padding for better touch targets
+    paddingHorizontal: scale(20), // Adjusted horizontal padding
+    borderRadius: scale(8), // Slightly increased border radius
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: scale(48), // Accessibility: minimum touch target
-    minWidth: scale(100), // Minimum width to prevent squishing
+    minWidth: scale(120), // Increased minimum width
     ...styleTokens.shadows.sm,
   },
   buttonPressed: {
@@ -76,12 +79,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: styleTokens.colors.white,
-    fontSize: scale(13), // Scaled font size
+    fontSize: scale(14), // Slightly increased font size for better readability
     fontWeight: styleTokens.components.button.secondary.fontWeight,
     textTransform: 'uppercase',
     fontFamily: styleTokens.typography.fonts.robotoMono,
     letterSpacing: styleTokens.typography.letterSpacing.wide,
     textAlign: 'center',
     flexShrink: 1,
+    lineHeight: scale(18), // Added line height for better text spacing
   },
 });
