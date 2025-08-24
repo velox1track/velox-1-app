@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
   ScrollView, 
-  TouchableOpacity, 
   TextInput, 
   Alert,
   SafeAreaView 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MobileH1, MobileH2, MobileBody, MobileCaption } from '../components/Typography';
+import { Card } from '../components/Card';
+import { ButtonPrimary, ButtonSecondary } from '../components';
+import { styleTokens } from '../theme';
+import { scale } from '../utils/scale';
 
 const ScoreboardScreen = () => {
   const [teams, setTeams] = useState([]);
@@ -151,10 +154,10 @@ const ScoreboardScreen = () => {
 
   const getEventStatusColor = (status) => {
     switch (status) {
-      case 'completed': return '#27ae60';
-      case 'pending': return '#f39c12';
-      case 'not-revealed': return '#bdc3c7';
-      default: return '#bdc3c7';
+      case 'completed': return styleTokens.colors.success;
+      case 'pending': return styleTokens.colors.warning;
+      case 'not-revealed': return styleTokens.colors.disabled;
+      default: return styleTokens.colors.disabled;
     }
   };
 
@@ -173,55 +176,61 @@ const ScoreboardScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* Team Scores Section */}
-        <View style={styles.scoresSection}>
+        <Card style={styles.scoresSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Team Scores</Text>
+            <MobileH2>Team Scores</MobileH2>
             {eventResults.length > 0 && (
-              <TouchableOpacity 
-                style={styles.resetButton} 
+              <ButtonSecondary 
                 onPress={resetAllResults}
               >
-                <Text style={styles.resetButtonText}>Reset All</Text>
-              </TouchableOpacity>
+                Reset All
+              </ButtonSecondary>
             )}
           </View>
 
           {teamScores.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No teams or results yet</Text>
-              <Text style={styles.emptySubtext}>
+              <MobileH1>No teams or results yet</MobileH1>
+              <MobileBody>
                 Create teams and enter event results to see scores
-              </Text>
+              </MobileBody>
             </View>
           ) : (
             <View style={styles.scoreboard}>
               {teamScores.map((team, index) => (
-                <View key={team.id} style={styles.scoreRow}>
-                  <View style={styles.rankColumn}>
-                    <Text style={styles.rankText}>#{index + 1}</Text>
+                <View key={team.id} style={styles.teamScoreRow}>
+                  <View style={styles.teamInfo}>
+                    <View style={styles.rankBadge}>
+                      <MobileCaption style={styles.rankText}>#{index + 1}</MobileCaption>
+                    </View>
+                    <View style={styles.teamDetails}>
+                      <MobileH2 style={styles.teamName}>{team.name}</MobileH2>
+                      <MobileCaption style={styles.teamStats}>
+                        {team.eventCount} events • {team.athletes.length} athletes
+                      </MobileCaption>
+                    </View>
                   </View>
-                  <View style={styles.teamColumn}>
-                    <Text style={styles.teamName}>{team.name}</Text>
-                    <Text style={styles.teamStats}>
-                      {team.athletes.length} athletes • {team.eventCount} events
-                    </Text>
-                  </View>
-                  <View style={styles.scoreColumn}>
-                    <Text style={styles.totalScore}>{team.totalScore}</Text>
-                    <Text style={styles.averageScore}>
+                  <View style={styles.scoreInfo}>
+                    <MobileH2 style={styles.totalScore}>{team.totalScore}</MobileH2>
+                    <MobileCaption style={styles.averageScore}>
                       Avg: {team.averageScore}
-                    </Text>
+                    </MobileCaption>
                   </View>
                 </View>
               ))}
             </View>
           )}
-        </View>
+        </Card>
 
-        {/* Event Results Section */}
+        {/* Event Sequence Section */}
         {eventSequence.length > 0 && (
-          <View style={styles.eventsSection}>
-            <Text style={styles.sectionTitle}>Event Results</Text>
+          <Card style={styles.eventsSection}>
+            <View style={styles.sectionHeader}>
+              <MobileH2>Event Sequence</MobileH2>
+              <MobileCaption style={styles.eventsSubtitle}>
+                {revealedIndex} of {eventSequence.length} events revealed
+              </MobileCaption>
+            </View>
             
             <View style={styles.eventsList}>
               {eventSequence.map((event, index) => {
@@ -230,73 +239,61 @@ const ScoreboardScreen = () => {
                 const statusText = getEventStatusText(status);
                 
                 return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.eventItem,
-                      { borderLeftColor: statusColor }
-                    ]}
-                    onPress={() => handleEventSelection(event, index)}
-                    disabled={status === 'not-revealed'}
-                  >
+                  <View key={index} style={styles.eventRow}>
                     <View style={styles.eventInfo}>
-                      <Text style={styles.eventNumber}>#{index + 1}</Text>
-                      <Text style={styles.eventName}>{event}</Text>
+                      <MobileH2 style={styles.eventNumber}>#{index + 1}</MobileH2>
+                      <MobileBody style={styles.eventName}>{event}</MobileBody>
                     </View>
+                    
                     <View style={styles.eventStatus}>
-                      <Text style={[styles.statusText, { color: statusColor }]}>
-                        {statusText}
-                      </Text>
+                      <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+                        <MobileCaption style={styles.statusText}>{statusText}</MobileCaption>
+                      </View>
+                      
+                      {status === 'pending' && (
+                        <ButtonSecondary 
+                          onPress={() => handleEventSelection(event, index)}
+                        >
+                          Enter Result
+                        </ButtonSecondary>
+                      )}
                     </View>
-                  </TouchableOpacity>
+                  </View>
                 );
               })}
             </View>
-          </View>
-        )}
-
-        {/* Result Entry Form */}
-        {showResultForm && selectedEvent && (
-          <EventResultForm
-            event={selectedEvent}
-            teams={teams}
-            onSubmit={submitEventResult}
-            onCancel={() => {
-              setShowResultForm(false);
-              setSelectedEvent(null);
-            }}
-          />
+          </Card>
         )}
 
         {/* Instructions */}
         {eventSequence.length === 0 && (
-          <View style={styles.instructionsSection}>
-            <Text style={styles.instructionsTitle}>How Scoring Works</Text>
+          <Card style={styles.instructionsSection}>
+            <MobileH2>How Scoring Works</MobileH2>
             <View style={styles.instructionItem}>
-              <Text style={styles.instructionNumber}>1</Text>
-              <Text style={styles.instructionText}>
-                Generate an event sequence in the Race Roulette screen
-              </Text>
+              <MobileCaption style={styles.instructionNumber}>1</MobileCaption>
+              <MobileBody style={styles.instructionText}>
+                Generate an event sequence in Race Roulette
+              </MobileBody>
             </View>
             <View style={styles.instructionItem}>
-              <Text style={styles.instructionNumber}>2</Text>
-              <Text style={styles.instructionText}>
-                Create teams in the Assign Teams screen
-              </Text>
+              <MobileCaption style={styles.instructionNumber}>2</MobileCaption>
+              <MobileBody style={styles.instructionText}>
+                Create teams and assign athletes in Assign Teams
+              </MobileBody>
             </View>
             <View style={styles.instructionItem}>
-              <Text style={styles.instructionNumber}>3</Text>
-              <Text style={styles.instructionText}>
-                Enter results for completed events to see team scores
-              </Text>
+              <MobileCaption style={styles.instructionNumber}>3</MobileCaption>
+              <MobileBody style={styles.instructionText}>
+                Enter results for each completed event
+              </MobileBody>
             </View>
             <View style={styles.instructionItem}>
-              <Text style={styles.instructionNumber}>4</Text>
-              <Text style={styles.instructionText}>
-                Scoring: 1st=10pts, 2nd=8pts, 3rd=6pts, 4th=4pts, 5th=2pts, 6th=1pt
-              </Text>
+              <MobileCaption style={styles.instructionNumber}>4</MobileCaption>
+              <MobileBody style={styles.instructionText}>
+                View real-time team rankings and scores
+              </MobileBody>
             </View>
-          </View>
+          </Card>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -348,13 +345,13 @@ const EventResultForm = ({ event, teams, onSubmit, onCancel }) => {
   };
 
   return (
-    <View style={styles.resultFormContainer}>
-      <Text style={styles.formTitle}>Enter Results: {event.event}</Text>
+    <Card style={styles.resultFormContainer}>
+      <MobileH2 style={styles.formTitle}>Enter Results: {event.event}</MobileH2>
       
       <View style={styles.placementsList}>
         {placements.map((placement) => (
           <View key={placement.teamId} style={styles.placementRow}>
-            <Text style={styles.teamName}>{placement.teamName}</Text>
+            <MobileBody style={styles.teamName}>{placement.teamName}</MobileBody>
             <TextInput
               style={styles.placementInput}
               value={placement.place}
@@ -368,163 +365,154 @@ const EventResultForm = ({ event, teams, onSubmit, onCancel }) => {
       </View>
 
       <View style={styles.formButtons}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit Results</Text>
-        </TouchableOpacity>
+        <ButtonSecondary onPress={onCancel}>
+          Cancel
+        </ButtonSecondary>
+        <ButtonPrimary onPress={handleSubmit}>
+          Submit Results
+        </ButtonPrimary>
       </View>
-    </View>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecf0f1',
+    backgroundColor: styleTokens.colors.background,
   },
   scrollView: {
     flex: 1,
+    padding: scale(24),
   },
   scoresSection: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: scale(24),
+    padding: scale(20),
+    minHeight: scale(120),
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  resetButton: {
-    backgroundColor: '#e74c3c',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  resetButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
+    marginBottom: scale(20),
   },
   emptyContainer: {
     alignItems: 'center',
-    padding: 40,
+    padding: scale(40),
   },
   emptyText: {
-    fontSize: 18,
-    color: '#7f8c8d',
-    marginBottom: 8,
+    color: styleTokens.colors.textSecondary,
+    marginBottom: scale(8),
+    textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#bdc3c7',
+    color: styleTokens.colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
+    opacity: 0.7,
   },
   scoreboard: {
-    gap: 12,
+    gap: scale(16),
   },
-  scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-  },
-  rankColumn: {
-    width: 50,
-    alignItems: 'center',
-  },
-  rankText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  teamColumn: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  teamName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  teamStats: {
-    fontSize: 14,
-    color: '#7f8c8d',
-  },
-  scoreColumn: {
-    alignItems: 'flex-end',
-  },
-  totalScore: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#27ae60',
-  },
-  averageScore: {
-    fontSize: 12,
-    color: '#7f8c8d',
-  },
-  eventsSection: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 20,
-  },
-  eventsList: {
-    gap: 8,
-  },
-  eventItem: {
+  teamScoreRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    borderLeftWidth: 4,
+    padding: scale(16),
+    backgroundColor: styleTokens.colors.surface,
+    borderRadius: styleTokens.components.card.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  teamInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  rankBadge: {
+    backgroundColor: styleTokens.colors.primary,
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: scale(16),
+  },
+  rankText: {
+    color: styleTokens.colors.white,
+    fontWeight: 'bold',
+  },
+  teamDetails: {
+    flex: 1,
+  },
+  teamName: {
+    color: styleTokens.colors.textPrimary,
+    marginBottom: scale(4),
+  },
+  teamStats: {
+    color: styleTokens.colors.textSecondary,
+    opacity: 0.7,
+  },
+  scoreInfo: {
+    alignItems: 'flex-end',
+  },
+  totalScore: {
+    color: styleTokens.colors.textPrimary,
+    marginBottom: scale(4),
+  },
+  averageScore: {
+    color: styleTokens.colors.textSecondary,
+    opacity: 0.7,
+  },
+  eventsSection: {
+    marginBottom: scale(24),
+    padding: scale(20),
+    minHeight: scale(120),
+  },
+  eventsSubtitle: {
+    color: styleTokens.colors.textSecondary,
+    opacity: 0.7,
+  },
+  eventsList: {
+    gap: scale(16),
+  },
+  eventRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: scale(16),
+    backgroundColor: styleTokens.colors.surface,
+    borderRadius: styleTokens.components.card.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   eventInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   eventNumber: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#7f8c8d',
-    marginRight: 12,
+    color: styleTokens.colors.primary,
+    marginRight: scale(16),
+    minWidth: scale(40),
   },
   eventName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
+    color: styleTokens.colors.textPrimary,
+    flex: 1,
   },
   eventStatus: {
     alignItems: 'flex-end',
+    gap: scale(8),
+  },
+  statusBadge: {
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(12),
+    minWidth: scale(80),
+    alignItems: 'center',
   },
   statusText: {
-    fontSize: 14,
-    fontWeight: '600',
+    color: styleTokens.colors.white,
+    fontWeight: 'bold',
   },
   resultFormContainer: {
     backgroundColor: '#ffffff',

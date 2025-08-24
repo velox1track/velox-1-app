@@ -1,27 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
   ScrollView, 
-  TouchableOpacity, 
   TextInput, 
   Alert,
-  ActivityIndicator,
-  SafeAreaView 
+  SafeAreaView,
+  useWindowDimensions,
+  Image,
+  Pressable,
+  Text
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventCard from '../components/EventCard';
 import { generateEventSequence, getDefaultEventPool } from '../lib/randomizer';
+import { MobileH1, MobileH2, MobileBody, MobileCaption } from '../components/Typography';
+import { Card } from '../components/Card';
+import { ButtonPrimary, ButtonSecondary } from '../components';
+import { styleTokens } from '../theme';
+import { scale } from '../utils/scale';
 
 const RaceRouletteScreen = () => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  
   const [eventPool, setEventPool] = useState(getDefaultEventPool());
   const [totalEvents, setTotalEvents] = useState('5');
   const [numRelays, setNumRelays] = useState('1');
   const [relayPositions, setRelayPositions] = useState('');
   const [eventSequence, setEventSequence] = useState([]);
   const [revealedIndex, setRevealedIndex] = useState(0);
-  const [isRevealing, setIsRevealing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Load saved state on component mount
@@ -85,14 +93,11 @@ const RaceRouletteScreen = () => {
       return;
     }
 
-    setIsRevealing(true);
-    
-    // Simulate loading animation
-    setTimeout(() => {
-      setRevealedIndex(prev => prev + 1);
-      setIsRevealing(false);
-      saveState();
-    }, 1000);
+    setRevealedIndex(prev => {
+      const newIndex = prev + 1;
+      return newIndex;
+    });
+    saveState();
   };
 
   const resetSequence = () => {
@@ -123,124 +128,178 @@ const RaceRouletteScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={[styles.scrollView, isLandscape && styles.scrollViewLandscape]}>
         {/* Controls Section */}
-        <View style={styles.controlsSection}>
-          <Text style={styles.sectionTitle}>Generate Event Sequence</Text>
-          
-          <View style={styles.inputRow}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Total Events</Text>
-              <TextInput
-                style={styles.input}
-                value={totalEvents}
-                onChangeText={setTotalEvents}
-                keyboardType="numeric"
-                placeholder="5"
-              />
-            </View>
+        <Card style={[styles.controlsSection, isLandscape && styles.controlsSectionLandscape]}>
+          <View style={[styles.controlsContent, isLandscape && styles.controlsContentLandscape]}>
+            <MobileH2 style={[
+              styles.sectionTitle, 
+              isLandscape && styles.sectionTitleLandscape,
+              width < 400 && styles.sectionTitleSmall,
+              width < 350 && styles.sectionTitleTiny
+            ]}>
+              Generate Sequence
+            </MobileH2>
             
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Number of Relays</Text>
+            <View style={[styles.inputsContainer, isLandscape && styles.inputsContainerLandscape]}>
+              <View style={styles.inputGroup}>
+                <MobileBody style={styles.label}>Total Events</MobileBody>
+                <TextInput
+                  style={styles.input}
+                  value={totalEvents}
+                  onChangeText={setTotalEvents}
+                  keyboardType="numeric"
+                  placeholder="5"
+                />
+              </View>
+              
+              <View style={styles.inputGroup}>
+                <MobileBody style={styles.label}>Number of Relays</MobileBody>
+                <TextInput
+                  style={styles.input}
+                  value={numRelays}
+                  onChangeText={setNumRelays}
+                  keyboardType="numeric"
+                  placeholder="1"
+                />
+              </View>
+            </View>
+
+            <View style={[styles.inputGroup, styles.relayPositionsGroup, isLandscape && styles.relayPositionsGroupLandscape]}>
+              <MobileBody style={styles.label}>Relay Positions (Optional)</MobileBody>
+              <MobileCaption style={[
+                styles.helpText,
+                isLandscape && styles.helpTextLandscape,
+                width < 400 && styles.helpTextSmall,
+                width < 350 && styles.helpTextTiny
+              ]}>
+                Comma-separated (e.g., "1,3,5")
+              </MobileCaption>
               <TextInput
                 style={styles.input}
-                value={numRelays}
-                onChangeText={setNumRelays}
-                keyboardType="numeric"
-                placeholder="1"
+                value={relayPositions}
+                onChangeText={setRelayPositions}
+                placeholder="Leave blank for random positions"
               />
             </View>
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Relay Positions (Optional)</Text>
-            <Text style={styles.helpText}>
-              Comma-separated positions (e.g., "1,3,5")
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={relayPositions}
-              onChangeText={setRelayPositions}
-              placeholder="Leave blank for random positions"
+            <ButtonPrimary 
+              style={styles.generateButton} 
+              onPress={generateSequence}
+              disabled={isLoading}
+              title={isLoading ? 'Generating...' : 'Generate Sequence'}
             />
           </View>
-
-          <TouchableOpacity 
-            style={styles.generateButton} 
-            onPress={generateSequence}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#ffffff" />
-            ) : (
-              <Text style={styles.buttonText}>Generate Sequence</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+        </Card>
 
         {/* Reveal Section */}
         {eventSequence.length > 0 && (
-          <View style={styles.revealSection}>
-            <Text style={styles.sectionTitle}>Reveal Next Event</Text>
+          <Card style={[styles.revealSection, isLandscape && styles.revealSectionLandscape]}>
+            <MobileH2 style={[
+              styles.sectionTitle, 
+              isLandscape && styles.sectionTitleLandscape,
+              width < 400 && styles.sectionTitleSmall,
+              width < 350 && styles.sectionTitleTiny
+            ]}>
+              Reveal Next Event
+            </MobileH2>
             
-            <View style={styles.nextEventCard}>
-              {isRevealing ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#f39c12" />
-                  <Text style={styles.loadingText}>Loading Event...</Text>
-                </View>
-              ) : (
-                <>
-                  <Text style={styles.nextEventLabel}>
-                    Event #{revealedIndex + 1}
-                  </Text>
-                  <Text style={styles.nextEventName}>
-                    {getNextEvent() || 'All events revealed!'}
-                  </Text>
+            {/* Futuristic Digital Screen Simulator */}
+            <View style={styles.digitalScreenContainer}>
+              {/* Main Digital Screen */}
+              <View style={styles.digitalScreen}>
+                {/* Corner Mounting Brackets */}
+                <View style={styles.cornerTL} />
+                <View style={styles.cornerTR} />
+                <View style={styles.cornerBL} />
+                <View style={styles.cornerBR} />
+                
+                {/* Circuit Pattern Background */}
+                <View style={styles.circuitPattern} />
+                
+                {/* Scan Line Effect */}
+                <View style={styles.scanLine} />
+                
+                {/* Screen Content */}
+                <View style={styles.screenContent}>
+                  {/* Header */}
+                  <View style={styles.screenHeader}>
+                    <View style={styles.logoContainer}>
+                      <Image source={require('../../Images/minimal_logo.png')} style={styles.logoImage} />
+                    </View>
+                    <Text style={styles.raceControlText}>RACE CONTROL</Text>
+                  </View>
                   
-                  {getNextEvent() && (
-                    <TouchableOpacity 
-                      style={styles.revealButton} 
-                      onPress={revealNextEvent}
-                    >
-                      <Text style={styles.revealButtonText}>Reveal Event</Text>
-                    </TouchableOpacity>
-                  )}
-                </>
+                  {/* Main Display */}
+                  <View style={styles.mainDisplay}>
+                    <Text style={styles.mainTitle}>
+                      {getNextEvent() || 'RACE ROULETTE'}
+                    </Text>
+                    
+                    {getNextEvent() && (
+                      <Text style={styles.eventNumber}>
+                        Event #{revealedIndex + 1}
+                      </Text>
+                    )}
+                  </View>
+                  
+                  {/* Footer */}
+                  <View style={styles.screenFooter}>
+                    <Text style={styles.versionText}>VELOX-1.0</Text>
+                  </View>
+                </View>
+              </View>
+              
+              {/* Reveal Button */}
+              {getNextEvent() && (
+                <Pressable 
+                  style={styles.revealButton}
+                  onPress={revealNextEvent}
+                >
+                  <Text style={styles.revealButtonText}>REVEAL EVENT</Text>
+                </Pressable>
               )}
             </View>
 
             <View style={styles.progressInfo}>
-              <Text style={styles.progressText}>
+              <MobileCaption style={styles.progressText}>
                 {revealedIndex} of {eventSequence.length} events revealed
-              </Text>
+              </MobileCaption>
             </View>
-          </View>
+          </Card>
         )}
 
         {/* Event Sequence Display */}
         {eventSequence.length > 0 && (
-          <View style={styles.sequenceSection}>
-            <View style={styles.sequenceHeader}>
-              <Text style={styles.sectionTitle}>Event Sequence</Text>
-              <TouchableOpacity 
+          <Card style={[styles.sequenceSection, isLandscape && styles.sequenceSectionLandscape]}>
+            <View style={[styles.sequenceHeader, isLandscape && styles.sequenceHeaderLandscape]}>
+              <MobileH2 style={[
+                styles.sectionTitle, 
+                isLandscape && styles.sectionTitleLandscape,
+                width < 400 && styles.sectionTitleSmall,
+                width < 350 && styles.sectionTitleTiny
+              ]}>
+                Event Sequence
+              </MobileH2>
+              <ButtonSecondary 
                 style={styles.resetButton} 
                 onPress={resetSequence}
-              >
-                <Text style={styles.resetButtonText}>Reset</Text>
-              </TouchableOpacity>
+                title="Reset"
+              />
             </View>
             
-            {eventSequence.map((event, index) => (
-              <EventCard
-                key={index}
-                event={event}
-                index={index}
-                isRevealed={index < revealedIndex}
-                isNext={index === revealedIndex}
-              />
-            ))}
-          </View>
+            <View style={[styles.sequenceGrid, isLandscape && styles.sequenceGridLandscape]}>
+              {eventSequence.map((event, index) => (
+                <EventCard
+                  key={index}
+                  event={event}
+                  index={index}
+                  isRevealed={index < revealedIndex}
+                  isNext={index === revealedIndex}
+                />
+              ))}
+            </View>
+          </Card>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -250,156 +309,401 @@ const RaceRouletteScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecf0f1',
+    backgroundColor: styleTokens.colors.background,
   },
   scrollView: {
     flex: 1,
+    padding: scale(24),
+  },
+  scrollViewLandscape: {
+    padding: scale(24),
+    maxWidth: '100%', // Prevents content from extending beyond screen
   },
   controlsSection: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: scale(24),
+    padding: scale(20),
+    minHeight: scale(120),
+    maxWidth: '100%', // Prevents section from extending beyond screen
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 16,
-    textAlign: 'center',
+  controlsSectionLandscape: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    padding: scale(24), // More padding for landscape
   },
-  inputRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  inputGroup: {
+  controlsContent: {
     flex: 1,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 8,
+  controlsContentLandscape: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
   },
-  helpText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 8,
-    fontStyle: 'italic',
+  inputsContainer: {
+    flexDirection: 'column',
+    width: '100%',
+  },
+  inputsContainerLandscape: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: scale(24),
+    marginBottom: scale(16),
+    width: '100%',
+  },
+  sectionTitle: {
+    color: styleTokens.colors.textPrimary,
+    marginBottom: scale(20),
+    textAlign: 'center',
+    fontSize: scale(18), // Even smaller for portrait to ensure fit
+    lineHeight: scale(22),
+    flexShrink: 1, // Allow text to shrink if needed
+    flexWrap: 'wrap', // Enable text wrapping
+    paddingHorizontal: scale(8), // Add horizontal padding to prevent edge clipping
+  },
+  sectionTitleLandscape: {
+    fontSize: scale(24), // Larger size for landscape
+    lineHeight: scale(28),
+    paddingHorizontal: scale(12), // More padding for landscape
+  },
+  sectionTitleSmall: {
+    fontSize: scale(16), // Smaller font size for very small screens
+    lineHeight: scale(20),
+    paddingHorizontal: scale(4), // Less padding for small screens
+  },
+  sectionTitleTiny: {
+    fontSize: scale(14), // Even smaller font size for extremely narrow screens
+    lineHeight: scale(18),
+    paddingHorizontal: scale(2), // Less padding for tiny screens
+  },
+  inputGroup: {
+    marginBottom: scale(16),
+    flex: 1,
+    minWidth: 0, // Prevents flex items from overflowing
+  },
+  label: {
+    color: styleTokens.colors.textSecondary,
+    marginBottom: scale(8),
+    fontWeight: '600',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#bdc3c7',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#2c3e50',
-    backgroundColor: '#f8f9fa',
+    borderColor: styleTokens.colors.border,
+    borderRadius: styleTokens.components.input.borderRadius,
+    padding: scale(12),
+    backgroundColor: styleTokens.components.input.backgroundColor,
+    color: styleTokens.colors.textPrimary,
+    fontSize: scale(16),
+    minHeight: scale(48),
+    flex: 1,
+    minWidth: 0, // Prevents flex items from overflowing
+  },
+  helpText: {
+    color: styleTokens.colors.textSecondary,
+    fontSize: scale(11), // Smaller base font size for portrait
+    marginTop: scale(4),
+    opacity: 0.7,
+    textAlign: 'center',
+    flexShrink: 1,
+    flexWrap: 'wrap',
+    paddingHorizontal: scale(2), // Reduced padding for portrait
+    lineHeight: scale(14), // Tighter line height for portrait
+  },
+  helpTextLandscape: {
+    fontSize: scale(14),
+    paddingHorizontal: scale(8),
+    lineHeight: scale(18), // More comfortable line height for landscape
+  },
+  helpTextSmall: {
+    fontSize: scale(10), // Even smaller for very small screens
+    paddingHorizontal: scale(1),
+    lineHeight: scale(12),
+  },
+  helpTextTiny: {
+    fontSize: scale(9), // Tiny font for extremely narrow screens
+    paddingHorizontal: scale(0),
+    lineHeight: scale(11),
   },
   generateButton: {
-    backgroundColor: '#3498db',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    marginTop: scale(16),
+    alignSelf: 'center',
+    minWidth: scale(200),
+    maxWidth: '100%', // Prevents button from extending beyond container
   },
   revealSection: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: scale(24),
+    padding: scale(20),
+    minHeight: scale(120),
   },
-  nextEventCard: {
-    backgroundColor: '#f39c12',
-    padding: 24,
-    borderRadius: 12,
+  revealSectionLandscape: {
+    padding: scale(24), // More padding for landscape
+    marginBottom: scale(24),
+  },
+  digitalScreenContainer: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
-  loadingContainer: {
+  digitalScreen: {
+    width: scale(320),
+    height: scale(200),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#45A196',
+    borderRadius: scale(20),
+    borderWidth: scale(8),
+    borderColor: 'rgba(100, 226, 211, 0.8)',
+    shadowColor: 'rgba(100, 226, 211, 0.9)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: scale(25),
+    elevation: 8,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  screenContent: {
+    width: '100%',
+    height: '100%',
+    padding: scale(20),
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: scale(12),
+    // Add subtle digital screen texture
+    borderWidth: 1,
+    borderColor: 'rgba(100, 226, 211, 0.2)',
+    shadowColor: 'rgba(0, 0, 0, 0.8)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: scale(8),
+    elevation: 4,
+  },
+  screenHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: scale(16),
+    paddingBottom: scale(12),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(100, 226, 211, 0.3)',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  logoContainer: {
+    width: scale(40),
+    height: scale(40),
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 12,
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain', // Ensure the logo fits properly within the container
   },
-  nextEventLabel: {
-    color: '#ffffff',
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  nextEventName: {
-    color: '#ffffff',
-    fontSize: 24,
+  raceControlText: {
+    color: 'rgba(100, 226, 211, 0.9)',
+    fontSize: scale(8), // Match website font size
     fontWeight: 'bold',
-    marginBottom: 16,
+    letterSpacing: scale(1.2),
+  },
+  mainDisplay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    width: '100%',
+  },
+  mainTitle: {
+    color: '#64E2D3',
+    marginBottom: scale(8),
     textAlign: 'center',
+    fontSize: scale(28),
+    fontWeight: 'bold',
+    letterSpacing: scale(2),
+  },
+  eventNumber: {
+    color: '#64E2D3',
+    fontSize: scale(16),
+    fontWeight: 'bold',
+    textAlign: 'center',
+    letterSpacing: scale(1),
+  },
+  screenFooter: {
+    marginTop: scale(16),
+    paddingTop: scale(12),
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(100, 226, 211, 0.3)',
+    width: '100%',
+    alignItems: 'center',
+  },
+  versionText: {
+    color: 'rgba(100, 226, 211, 0.8)',
+    fontSize: scale(8), // Match website font size
+    fontWeight: 'bold',
+    letterSpacing: scale(0.8),
   },
   revealButton: {
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    minWidth: scale(160),
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    borderWidth: scale(3),
+    borderColor: '#64E2D3',
+    borderRadius: scale(12),
+    shadowColor: 'rgba(100, 226, 211, 0.6)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: scale(6),
+    elevation: 6,
+    marginTop: scale(16),
+    paddingVertical: scale(16),
+    paddingHorizontal: scale(32),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   revealButtonText: {
-    color: '#f39c12',
-    fontSize: 16,
+    color: '#64E2D3',
+    fontSize: scale(16),
     fontWeight: 'bold',
+    letterSpacing: scale(1),
   },
   progressInfo: {
     alignItems: 'center',
   },
   progressText: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    fontWeight: '600',
+    color: styleTokens.colors.textSecondary,
+    opacity: 0.8,
   },
   sequenceSection: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 20,
+    marginBottom: scale(24),
+    padding: scale(20),
+    minHeight: scale(120),
+  },
+  sequenceSectionLandscape: {
+    padding: scale(24), // More padding for landscape
+    marginBottom: scale(24),
+  },
+  sequenceGrid: {
+    flexDirection: 'column',
+    gap: scale(16),
+  },
+  sequenceGridLandscape: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: scale(16),
   },
   sequenceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: scale(20),
+    flexWrap: 'wrap', // Allow wrapping in portrait mode
+    gap: scale(12), // Add gap between title and button
+  },
+  sequenceHeaderLandscape: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: scale(20),
+    gap: scale(16), // Larger gap for landscape
   },
   resetButton: {
-    backgroundColor: '#e74c3c',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
+    minWidth: scale(80),
   },
-  resetButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
+  relayPositionsGroup: {
+    marginBottom: scale(16),
+    width: '100%',
+    alignItems: 'stretch',
+    paddingHorizontal: scale(2), // Add small padding for portrait
+  },
+  relayPositionsGroupLandscape: {
+    width: '100%',
+    marginBottom: scale(16),
+    alignItems: 'stretch',
+    paddingHorizontal: scale(4),
+  },
+  cornerTL: {
+    position: 'absolute',
+    top: scale(8),
+    left: scale(8),
+    width: scale(6),
+    height: scale(6),
+    backgroundColor: '#444',
+    borderRadius: scale(3),
+    zIndex: 4,
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: scale(2),
+    elevation: 2,
+  },
+  cornerTR: {
+    position: 'absolute',
+    top: scale(8),
+    right: scale(8),
+    width: scale(6),
+    height: scale(6),
+    backgroundColor: '#444',
+    borderRadius: scale(3),
+    zIndex: 4,
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: scale(2),
+    elevation: 2,
+  },
+  cornerBL: {
+    position: 'absolute',
+    bottom: scale(8),
+    left: scale(8),
+    width: scale(6),
+    height: scale(6),
+    backgroundColor: '#444',
+    borderRadius: scale(3),
+    zIndex: 4,
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: scale(2),
+    elevation: 2,
+  },
+  cornerBR: {
+    position: 'absolute',
+    bottom: scale(8),
+    right: scale(8),
+    width: scale(6),
+    height: scale(6),
+    backgroundColor: '#444',
+    borderRadius: scale(3),
+    zIndex: 4,
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: scale(2),
+    elevation: 2,
+  },
+  circuitPattern: {
+    position: 'absolute',
+    top: scale(16),
+    left: scale(16),
+    right: scale(16),
+    bottom: scale(16),
+    backgroundColor: 'transparent',
+    borderRadius: scale(8),
+    opacity: 0.3,
+    zIndex: 1,
+    // Create a more realistic circuit pattern
+    borderWidth: 1,
+    borderColor: 'rgba(100, 226, 211, 0.2)',
+    borderStyle: 'dashed',
+  },
+  scanLine: {
+    position: 'absolute',
+    top: scale(16),
+    left: scale(16),
+    right: scale(16),
+    height: scale(2),
+    backgroundColor: 'rgba(100, 226, 211, 0.4)',
+    zIndex: 5,
+    borderRadius: scale(12),
+    shadowColor: 'rgba(100, 226, 211, 0.8)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: scale(4),
   },
 });
 

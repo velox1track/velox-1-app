@@ -1,22 +1,29 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { MobileH2, MobileCaption } from './Typography';
+import { styleTokens } from '../theme';
+import { scale } from '../utils/scale';
 
 const EventCard = ({ event, index, isRevealed, isNext }) => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  
   return (
     <View style={[
       styles.card,
       isRevealed ? styles.revealed : styles.hidden,
-      isNext ? styles.nextEvent : null
+      isNext ? styles.nextEvent : null,
+      isLandscape && styles.cardLandscape
     ]}>
-      <Text style={styles.index}>#{index + 1}</Text>
-      <Text style={[
+      <MobileCaption style={styles.index}>#{index + 1}</MobileCaption>
+      <MobileH2 style={[
         styles.eventName,
         isRevealed ? styles.revealedText : styles.hiddenText
       ]}>
         {isRevealed ? event : '???'}
-      </Text>
+      </MobileH2>
       {isNext && !isRevealed && (
-        <Text style={styles.nextIndicator}>Next Event</Text>
+        <MobileCaption style={styles.nextIndicator}>Next Event</MobileCaption>
       )}
     </View>
   );
@@ -24,49 +31,53 @@ const EventCard = ({ event, index, isRevealed, isNext }) => {
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    minHeight: 80,
+    padding: scale(16),
+    marginVertical: scale(8),
+    marginHorizontal: scale(16),
+    borderRadius: styleTokens.components.card.borderRadius,
+    borderWidth: scale(2),
+    minHeight: scale(80),
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: styleTokens.colors.shadow,
+    shadowOffset: { width: 0, height: scale(2) },
+    shadowOpacity: 0.1,
+    shadowRadius: scale(4),
+    elevation: 3,
   },
   hidden: {
-    backgroundColor: '#34495e',
-    borderColor: '#2c3e50',
+    backgroundColor: styleTokens.colors.primaryDark,
+    borderColor: styleTokens.colors.border,
   },
   revealed: {
-    backgroundColor: '#27ae60',
-    borderColor: '#229954',
+    backgroundColor: styleTokens.colors.success,
+    borderColor: styleTokens.colors.success,
   },
   nextEvent: {
-    borderColor: '#f39c12',
-    borderWidth: 3,
+    borderColor: '#64E2D3',
+    borderWidth: scale(3),
   },
   index: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#ecf0f1',
-    marginBottom: 4,
+    color: styleTokens.colors.white,
+    marginBottom: scale(4),
   },
   eventName: {
-    fontSize: 18,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   hiddenText: {
-    color: '#bdc3c7',
+    color: styleTokens.colors.textSecondary,
   },
   revealedText: {
-    color: '#ffffff',
+    color: styleTokens.colors.white,
   },
   nextIndicator: {
-    fontSize: 12,
-    color: '#f39c12',
-    fontWeight: 'bold',
-    marginTop: 4,
+    color: '#64E2D3',
+    marginTop: scale(4),
+  },
+  cardLandscape: {
+    flex: 1,
+    minWidth: scale(200),
+    marginHorizontal: scale(8),
   },
 });
 

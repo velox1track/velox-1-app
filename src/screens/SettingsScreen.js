@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
   ScrollView, 
-  TouchableOpacity, 
   Alert,
   SafeAreaView 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MobileH1, MobileH2, MobileBody, MobileCaption } from '../components/Typography';
+import { Card } from '../components/Card';
+import { ButtonPrimary, ButtonSecondary } from '../components';
+import { styleTokens } from '../theme';
+import { scale } from '../utils/scale';
 
 const SettingsScreen = () => {
   const [dataStats, setDataStats] = useState({
@@ -170,134 +173,97 @@ const SettingsScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* App Info Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Information</Text>
+        <Card style={styles.section}>
+          <MobileH2>App Information</MobileH2>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>App Name</Text>
-            <Text style={styles.infoValue}>Velox 1 Race Roulette</Text>
+            <MobileBody style={styles.infoLabel}>App Name</MobileBody>
+            <MobileBody style={styles.infoValue}>Velox 1 Race Roulette</MobileBody>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Version</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
+            <MobileBody style={styles.infoLabel}>Version</MobileBody>
+            <MobileBody style={styles.infoValue}>1.0.0</MobileBody>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Description</Text>
-            <Text style={styles.infoValue}>Track Competition Organizer</Text>
+            <MobileBody style={styles.infoLabel}>Description</MobileBody>
+            <MobileBody style={styles.infoValue}>Track Competition Organizer</MobileBody>
           </View>
-        </View>
+        </Card>
 
         {/* Data Statistics Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Statistics</Text>
+        <Card style={styles.section}>
+          <MobileH2>Data Statistics</MobileH2>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{dataStats.athletes}</Text>
-              <Text style={styles.statLabel}>Athletes</Text>
+              <MobileH1 style={styles.statNumber}>{dataStats.athletes}</MobileH1>
+              <MobileCaption style={styles.statLabel}>Athletes</MobileCaption>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{dataStats.teams}</Text>
-              <Text style={styles.statLabel}>Teams</Text>
+              <MobileH1 style={styles.statNumber}>{dataStats.teams}</MobileH1>
+              <MobileCaption style={styles.statLabel}>Teams</MobileCaption>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{dataStats.eventSequence}</Text>
-              <Text style={styles.statLabel}>Events</Text>
+              <MobileH1 style={styles.statNumber}>{dataStats.eventSequence}</MobileH1>
+              <MobileCaption style={styles.statLabel}>Events</MobileCaption>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{dataStats.eventResults}</Text>
-              <Text style={styles.statLabel}>Results</Text>
+              <MobileH1 style={styles.statNumber}>{dataStats.eventResults}</MobileH1>
+              <MobileCaption style={styles.statLabel}>Results</MobileCaption>
             </View>
           </View>
-        </View>
+        </Card>
 
         {/* Data Management Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
+        <Card style={styles.section}>
+          <MobileH2>Data Management</MobileH2>
           
-          <TouchableOpacity 
-            style={styles.actionButton} 
-            onPress={exportData}
-          >
-            <Text style={styles.actionButtonText}>Export All Data</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.warningButton]} 
-            onPress={resetEventProgress}
-          >
-            <Text style={styles.actionButtonText}>Reset Event Progress</Text>
-          </TouchableOpacity>
-
-          <View style={styles.separator} />
-
-          <Text style={styles.subsectionTitle}>Clear Specific Data</Text>
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.dangerButton]} 
-            onPress={() => clearSpecificData('athletes', 'athletes')}
-          >
-            <Text style={styles.actionButtonText}>Clear Athletes</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.dangerButton]} 
-            onPress={() => clearSpecificData('teams', 'teams')}
-          >
-            <Text style={styles.actionButtonText}>Clear Teams</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.dangerButton]} 
-            onPress={() => clearSpecificData('eventSequence', 'eventSequence')}
-          >
-            <Text style={styles.actionButtonText}>Clear Event Sequence</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.dangerButton]} 
-            onPress={() => clearSpecificData('eventResults', 'eventResults')}
-          >
-            <Text style={styles.actionButtonText}>Clear Event Results</Text>
-          </TouchableOpacity>
-
-          <View style={styles.separator} />
-
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.dangerButton]} 
-            onPress={clearAllData}
-          >
-            <Text style={styles.actionButtonText}>Clear All Data</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Help Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Help & Support</Text>
-          
-          <View style={styles.helpItem}>
-            <Text style={styles.helpTitle}>Getting Started</Text>
-            <Text style={styles.helpText}>
-              1. Add athletes in Team Builder{'\n'}
-              2. Generate event sequence in Race Roulette{'\n'}
-              3. Create teams in Assign Teams{'\n'}
-              4. Enter results in Scoreboard
-            </Text>
+          <View style={styles.buttonGroup}>
+            <ButtonSecondary 
+              onPress={exportData}
+            >
+              Export Data
+            </ButtonSecondary>
+            <ButtonSecondary 
+              onPress={resetEventProgress}
+            >
+              Reset Event Progress
+            </ButtonSecondary>
           </View>
 
-          <View style={styles.helpItem}>
-            <Text style={styles.helpTitle}>Data Persistence</Text>
-            <Text style={styles.helpText}>
-              All data is stored locally on your device using AsyncStorage. 
-              Data persists between app sessions but will be lost if you clear app data or uninstall the app.
-            </Text>
+          <View style={styles.clearButtonsContainer}>
+            <ButtonSecondary 
+              onPress={() => clearSpecificData('athletes', 'athletes')}
+            >
+              Clear Athletes
+            </ButtonSecondary>
+            <ButtonSecondary 
+              onPress={() => clearSpecificData('teams', 'teams')}
+            >
+              Clear Teams
+            </ButtonSecondary>
+            <ButtonSecondary 
+              onPress={() => clearSpecificData('eventSequence', 'eventSequence')}
+            >
+              Clear Event Sequence
+            </ButtonSecondary>
+            <ButtonSecondary 
+              onPress={() => clearSpecificData('eventResults', 'eventResults')}
+            >
+              Clear Event Results
+            </ButtonSecondary>
           </View>
 
-          <View style={styles.helpItem}>
-            <Text style={styles.helpTitle}>Backup Recommendation</Text>
-            <Text style={styles.helpText}>
-              Use the Export Data feature to create backups of your competition data before clearing or resetting.
-            </Text>
+          <View style={styles.dangerZone}>
+            <MobileH2 style={styles.dangerZoneTitle}>⚠️ Danger Zone</MobileH2>
+            <MobileBody style={styles.dangerZoneText}>
+              These actions will permanently delete data and cannot be undone.
+            </MobileBody>
+            <ButtonSecondary 
+              onPress={clearAllData}
+            >
+              Clear All Data
+            </ButtonSecondary>
           </View>
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -306,114 +272,81 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecf0f1',
+    backgroundColor: styleTokens.colors.background,
   },
   scrollView: {
     flex: 1,
+    padding: scale(24),
   },
   section: {
-    backgroundColor: '#ffffff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 16,
-    textAlign: 'center',
+    marginBottom: scale(24),
+    padding: scale(20),
+    minHeight: scale(120),
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: scale(12),
     borderBottomWidth: 1,
-    borderBottomColor: '#ecf0f1',
+    borderBottomColor: styleTokens.colors.border,
   },
   infoLabel: {
-    fontSize: 16,
+    color: styleTokens.colors.textSecondary,
     fontWeight: '600',
-    color: '#2c3e50',
   },
   infoValue: {
-    fontSize: 16,
-    color: '#7f8c8d',
+    color: styleTokens.colors.textPrimary,
+    textAlign: 'right',
+    flex: 1,
+    marginLeft: scale(16),
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: scale(16),
   },
   statItem: {
-    flex: 1,
-    minWidth: '45%',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
+    flex: 1,
+    minWidth: scale(80),
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#3498db',
-    marginBottom: 4,
+    color: styleTokens.colors.primary,
+    marginBottom: scale(8),
   },
   statLabel: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    color: styleTokens.colors.textSecondary,
     textAlign: 'center',
   },
-  actionButton: {
-    backgroundColor: '#3498db',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: scale(16),
   },
-  warningButton: {
-    backgroundColor: '#f39c12',
+  clearButtonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    gap: scale(12),
+    marginBottom: scale(16),
   },
-  dangerButton: {
-    backgroundColor: '#e74c3c',
+  dangerZone: {
+    backgroundColor: '#fdf6e3',
+    padding: scale(20),
+    borderRadius: scale(12),
+    marginTop: scale(16),
   },
-  actionButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#ecf0f1',
-    marginVertical: 20,
-  },
-  subsectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 16,
+  dangerZoneTitle: {
+    color: '#c0392b',
+    marginBottom: scale(12),
     textAlign: 'center',
   },
-  helpItem: {
-    marginBottom: 20,
-  },
-  helpTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 8,
-  },
-  helpText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    lineHeight: 20,
+  dangerZoneText: {
+    color: styleTokens.colors.textSecondary,
+    marginBottom: scale(16),
+    textAlign: 'center',
   },
 });
 
